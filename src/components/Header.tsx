@@ -1,22 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { showSuccess, showError } from "@/utils/toast";
+import UserMenu from "@/components/UserMenu";
 
 const Header: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    const res = await signOut();
-    // @ts-ignore
-    if (res?.error) {
-      showError(res.error.message || "Erro ao sair");
-      return;
-    }
-    showSuccess("Você saiu com sucesso.");
-    navigate("/login", { replace: true });
-  };
+  const { user, profile } = useAuth();
 
   return (
     <header className="w-full bg-white border-b">
@@ -35,34 +23,12 @@ const Header: React.FC = () => {
 
           {user ? (
             <div className="flex items-center space-x-3">
-              <div className="text-right">
+              <div className="hidden md:block text-right">
                 <div className="text-sm font-medium">{user.email}</div>
                 <div className="text-xs text-gray-500">{profile?.role ?? "USER"}</div>
               </div>
 
-              <button
-                onClick={() => navigate("/profile")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
-                title="Ver/Editar perfil"
-              >
-                Perfil
-              </button>
-
-              <button
-                onClick={() => navigate("/")}
-                className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
-                title="Ir para o dashboard"
-              >
-                Dashboard
-              </button>
-
-              <button
-                onClick={handleSignOut}
-                className="px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                title="Sair"
-              >
-                Sair
-              </button>
+              <UserMenu />
             </div>
           ) : (
             <div className="flex items-center space-x-2">
