@@ -8,13 +8,9 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    // signOut returns a promise from supabase; we call and then navigate
-    // allow errors to surface, but show a friendly toast for UX
     const res = await signOut();
-    // supabase returns an object; show success and redirect
     // @ts-ignore
     if (res?.error) {
-      // show error message but don't swallow exception (we don't catch)
       showError(res.error.message || "Erro ao sair");
       return;
     }
@@ -43,6 +39,14 @@ const Header: React.FC = () => {
                 <div className="text-sm font-medium">{user.email}</div>
                 <div className="text-xs text-gray-500">{profile?.role ?? "USER"}</div>
               </div>
+
+              <button
+                onClick={() => navigate("/profile")}
+                className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
+                title="Ver/Editar perfil"
+              >
+                Perfil
+              </button>
 
               <button
                 onClick={() => navigate("/")}
