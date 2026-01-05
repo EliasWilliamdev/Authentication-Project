@@ -23,7 +23,7 @@ const Login: React.FC = () => {
     const attempts = parseInt(localStorage.getItem(ATTEMPT_KEY) || "0", 10) + 1;
     localStorage.setItem(ATTEMPT_KEY, attempts.toString());
     if (attempts >= MAX_ATTEMPTS) {
-      localStorage.setItem((LOCK_KEY), (Date.now() + LOCK_DURATION_MS).toString());
+      localStorage.setItem(LOCK_KEY, (Date.now() + LOCK_DURATION_MS).toString());
       showError("Muitas tentativas falhas — tente novamente mais tarde.");
     }
   };
@@ -46,9 +46,7 @@ const Login: React.FC = () => {
     // Supabase returns error in result.error (v2)
     // If result.error exists -> sign-in failed
     // If result.data.session exists -> success
-    // We intentionally do not swallow errors
-    // as per project guidelines; pass them upstream via toasts
-    // but do keep simple client lock behavior.
+    // We intentionally do not swallow errors as per project guidelines
     // @ts-ignore
     if (result.error) {
       incrementAttempts();
@@ -68,18 +66,61 @@ const Login: React.FC = () => {
     showSuccess("Verifique seu e-mail para continuar.");
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Use a separate handler for creating account (triggered by button click)
+  const handleSignUp = async () => {
+    if (isLocked) {
+      showError("Conta bloqueada temporariamente. Aguarde alguns minutos.");
+      return;
+    }
+
+    if (!email || !password) {
+      showError("Preencha email e senha para criar a conta.");
+      return;
+    }
+
     setLoading(true);
     const result = await signUp(email, password);
     setLoading(false);
 
     // @ts-ignore
     if (result.error) {
+      // If sign up failed, increment attempts and show error
+      incrementAttempts();
       showError(result.error.message || "Falha ao criar conta.");
       return;
     }
 
+    // If signUp returned a session, user is already signed in
+    // @ts-ignore
+    if (result.data?.session) {
+      resetAttempts();
+      showSuccess("Conta criada e autenticada com sucesso!");
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // Some flows (confirmation email / magic link) don't return a session.
+    // Attempt to sign in immediately with provided credentials to log the user in.
+    setLoading(true);
+    const signInResult = await signIn(email, password);
+    setLoading(false);
+
+    // @ts-ignore
+    if (signInResult.error) {
+      // Not necessarily an error — might require email confirmation; inform user.
+      showSuccess("Conta criada. Verifique seu e-mail para confirmar (se aplicável).");
+      return;
+    }
+
+    // @ts-ignore
+    if (signInResult.data?.session) {
+      resetAttempts();
+      showSuccess("Conta criada e autenticada com sucesso!");
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // Final fallback
     showSuccess("Conta criada. Verifique seu e-mail para confirmar (se aplicável).");
   };
 
