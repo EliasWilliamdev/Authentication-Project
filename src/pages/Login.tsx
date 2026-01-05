@@ -40,15 +40,20 @@ const Login: React.FC = () => {
       showError("Conta bloqueada temporariamente. Aguarde alguns minutos.");
       return;
     }
+    if (!email || !password) {
+      showError("Preencha e-mail e senha.");
+      return;
+    }
+
     setLoading(true);
     const result = await signIn(email, password);
     setLoading(false);
 
-    // Debugging info for developer
+    // Debugging
     // @ts-ignore
     console.debug("signIn result:", result);
 
-    // Supabase v2 returns result.error when there's an auth error
+    // If explicit error, surface it
     // @ts-ignore
     if (result.error) {
       incrementAttempts();
@@ -56,6 +61,7 @@ const Login: React.FC = () => {
       return;
     }
 
+    // If signIn returned a session -> success
     // @ts-ignore
     if (result.data?.session) {
       resetAttempts();
@@ -64,9 +70,25 @@ const Login: React.FC = () => {
       return;
     }
 
-    // If there's no session and no explicit error, show helpful message
+    // If no session was returned but no error, check current session explicitly
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      // Debugging
+      console.debug("getSession result:", sessionData);
+
+      if (sessionData?.session) {
+        resetAttempts();
+        showSuccess("Autenticado com sucesso!");
+        navigate("/", { replace: true });
+        return;
+      }
+    } catch (err) {
+      console.debug("getSession threw:", err);
+    }
+
+    // If we reach here, no session was created: likely the account requires email confirmation
     showError(
-      "Não foi possível autenticar. Verifique seu e-mail/senha e se a conta foi confirmada via e-mail.",
+      "Não foi possível autenticar. Verifique seu e-mail/senha e confirme sua conta via e-mail se necessário. Você também pode usar o link mágico para entrar sem senha.",
     );
   };
 
@@ -108,7 +130,7 @@ const Login: React.FC = () => {
 
     // If signUp created the user but didn't return a session, it's likely
     // because email confirmation is required (magic link / confirmation email).
-    // Inform the user to check their email instead of trying to sign in immediately.
+    // Inform the user to check their email.
     // @ts-ignore
     if (result.data?.user && !result.data?.session) {
       showSuccess(
@@ -194,7 +216,7 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          <div className="mt-2 flex justify-center">
+          <div className="mt-2 flex justify-center space-x-4">
             <button
               onClick={handleSendMagicLink}
               type="button"
@@ -202,6 +224,31 @@ const Login: React.FC = () => {
               className="px-3 py-2 text-sm text-blue-600 hover:underline disabled:opacity-60"
             >
               Enviar link mágico (entrar sem senha)
+            </button>
+            <button
+              onClick={async () => {
+                // Try to re-send invite/confirmation via admin flow (fallback)
+                if (!email) {
+                  showError("Forneça um e-mail para reenviar instruções.");
+                  return;
+                }
+                setLoading(true);
+                // Supabase doesn't provide a direct 'resend confirmation' API for magic link flows,
+                // so we reuse signInWithOtp to send a new magic link as a reliable fallback.
+                const res = await supabase.auth.signInWithOtp({ email });
+                setLoading(false);
+                // @ts-ignore
+                if (res.error) {
+                  showError(res.error.message || "Falha ao reenviar instruções.");
+                  return;
+                }
+                showSuccess("Instruções reenviadas para o seu e-mail.");
+              }}
+              type="button"
+              disabled={loading || !email}
+              className="px-3 py-2 text-sm text-gray-600 hover:underline disabled:opacity-60"
+            >
+              Reenviar link / instruções
             </button>
           </div>
         </form>
