@@ -16,6 +16,11 @@ const WelcomeCard: React.FC = () => {
     navigate("/profile", { replace: false });
   };
 
+  const handleGoToDashboard = () => {
+    showSuccess("Abrindo painel...");
+    navigate("/dashboard", { replace: false });
+  };
+
   return (
     <div className="max-w-3xl mx-auto mt-6">
       <div className="bg-gradient-to-r from-sky-50 to-white border rounded-lg shadow-sm p-5 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -40,7 +45,7 @@ const WelcomeCard: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate("/")}
+              onClick={handleGoToDashboard}
               className="px-3 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 text-sm"
             >
               Ir ao painel
