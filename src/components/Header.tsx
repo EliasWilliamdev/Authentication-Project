@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import UserMenu from "@/components/UserMenu";
+import UserMenu from "./UserMenu";
 
 const Header: React.FC = () => {
   const { user, profile } = useAuth();
