@@ -1,10 +1,11 @@
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { User as UserIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ProfileSummary: React.FC = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -41,15 +42,8 @@ const ProfileSummary: React.FC = () => {
 
           <div className="hidden sm:block">
             <Link
-              to="#profile-form"
+              to="/profile/edit"
               className="px-3 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 text-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                const el = document.getElementById("profile-form");
-                if (el) {
-                  el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }
-              }}
             >
               Editar perfil
             </Link>

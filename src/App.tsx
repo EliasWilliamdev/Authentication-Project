@@ -11,6 +11,7 @@ import AuthCallback from "@/pages/AuthCallback";
 import Profile from "@/pages/Profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
+import ProfileEdit from "@/pages/ProfileEdit";
 
 const queryClient = new QueryClient();
 
@@ -23,14 +24,25 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/profile/edit"
+              element={
+                <ProtectedRoute>
+                  <ProfileEdit />
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

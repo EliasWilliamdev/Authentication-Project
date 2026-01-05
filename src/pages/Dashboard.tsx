@@ -39,10 +39,10 @@ const Dashboard: React.FC = () => {
 
           <div className="flex gap-2 items-center">
             <Link
-              to="/profile"
+              to="/profile/edit"
               className="px-3 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 text-sm"
             >
-              Ver perfil
+              Editar perfil
             </Link>
 
             <button
@@ -90,7 +90,7 @@ const Dashboard: React.FC = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-sm text-gray-600">Links rápidos</h3>
               <div className="mt-3 flex flex-col gap-2">
-                <Link to="/profile" className="text-sky-600 hover:underline text-sm">Editar perfil</Link>
+                <Link to="/profile/edit" className="text-sky-600 hover:underline text-sm">Editar perfil</Link>
                 <a href="https://app.supabase.com" target="_blank" rel="noreferrer" className="text-sky-600 hover:underline text-sm">Painel Supabase</a>
                 <button
                   onClick={() => showSuccess("Ação rápida executada")}
