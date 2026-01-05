@@ -43,10 +43,11 @@ const Login: React.FC = () => {
     const result = await signIn(email, password);
     setLoading(false);
 
-    // Supabase returns error in result.error (v2)
-    // If result.error exists -> sign-in failed
-    // If result.data.session exists -> success
-    // We intentionally do not swallow errors as per project guidelines
+    // Debugging info for developer
+    // @ts-ignore
+    console.debug("signIn result:", result);
+
+    // Supabase v2 returns result.error when there's an auth error
     // @ts-ignore
     if (result.error) {
       incrementAttempts();
@@ -62,8 +63,10 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Fallback (e.g. magic link)
-    showSuccess("Verifique seu e-mail para continuar.");
+    // If there's no session and no explicit error, show helpful message
+    showError(
+      "Não foi possível autenticar. Verifique seu e-mail/senha e se a conta foi confirmada via e-mail.",
+    );
   };
 
   // Use a separate handler for creating account (triggered by button click)
@@ -82,9 +85,12 @@ const Login: React.FC = () => {
     const result = await signUp(email, password);
     setLoading(false);
 
+    // Debugging info for developer
+    // @ts-ignore
+    console.debug("signUp result:", result);
+
     // @ts-ignore
     if (result.error) {
-      // If sign up failed, increment attempts and show error
       incrementAttempts();
       showError(result.error.message || "Falha ao criar conta.");
       return;
@@ -99,28 +105,18 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Some flows (confirmation email / magic link) don't return a session.
-    // Attempt to sign in immediately with provided credentials to log the user in.
-    setLoading(true);
-    const signInResult = await signIn(email, password);
-    setLoading(false);
-
+    // If signUp created the user but didn't return a session, it's likely
+    // because email confirmation is required (magic link / confirmation email).
+    // Inform the user to check their email instead of trying to sign in immediately.
     // @ts-ignore
-    if (signInResult.error) {
-      // Not necessarily an error — might require email confirmation; inform user.
-      showSuccess("Conta criada. Verifique seu e-mail para confirmar (se aplicável).");
+    if (result.data?.user && !result.data?.session) {
+      showSuccess(
+        "Conta criada. Verifique seu e-mail para confirmar a conta antes de fazer login.",
+      );
       return;
     }
 
-    // @ts-ignore
-    if (signInResult.data?.session) {
-      resetAttempts();
-      showSuccess("Conta criada e autenticada com sucesso!");
-      navigate("/", { replace: true });
-      return;
-    }
-
-    // Final fallback
+    // Fallback
     showSuccess("Conta criada. Verifique seu e-mail para confirmar (se aplicável).");
   };
 
