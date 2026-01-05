@@ -11,10 +11,9 @@ const WelcomeCard: React.FC = () => {
   if (!user || !visible) return null;
 
   const handleGoToProfile = () => {
-    // We don't have a profile page implemented yet; navigate to home for now
     showSuccess("Abrindo perfil...");
     refreshProfile();
-    navigate("/", { replace: false });
+    navigate("/profile", { replace: false });
   };
 
   return (

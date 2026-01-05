@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import ProfileForm from "@/components/ProfileForm";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import ProfileSummary from "@/components/ProfileSummary";
 
 const ProfilePageContent: React.FC = () => {
   const { user } = useAuth();
@@ -20,6 +21,8 @@ const ProfilePageContent: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
+        <ProfileSummary />
+
         <h1 className="text-2xl font-semibold mb-4">Seu Perfil</h1>
         <p className="text-sm text-gray-600 mb-6">
           Atualize seu nome, sobrenome e avatar. As alterações serão salvas no seu perfil.

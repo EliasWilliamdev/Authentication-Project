@@ -42,7 +42,7 @@ const ProfileForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg shadow p-6">
+    <form id="profile-form" onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg shadow p-6">
       <div className="flex items-center space-x-4">
         <div>
           {avatarUrl ? (
