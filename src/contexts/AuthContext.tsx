@@ -1,5 +1,5 @@
 import React from "react";
-import supabase from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
 type UserProfile = {
