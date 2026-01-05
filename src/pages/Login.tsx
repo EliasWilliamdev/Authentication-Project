@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { showError, showSuccess } from "@/utils/toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ATTEMPT_KEY = "login_attempts";
 const LOCK_KEY = "login_lock_until";
@@ -111,13 +112,35 @@ const Login: React.FC = () => {
     // @ts-ignore
     if (result.data?.user && !result.data?.session) {
       showSuccess(
-        "Conta criada. Verifique seu e-mail para confirmar a conta antes de fazer login.",
+        "Conta criada. Verifique seu e-mail para confirmar a conta antes de fazer login. Você também pode usar o link mágico abaixo para acessar a conta.",
       );
       return;
     }
 
     // Fallback
     showSuccess("Conta criada. Verifique seu e-mail para confirmar (se aplicável).");
+  };
+
+  // Send magic link to email to allow login (useful if confirmation blocks sign-in)
+  const handleSendMagicLink = async () => {
+    if (!email) {
+      showError("Forneça um e-mail para receber o link mágico.");
+      return;
+    }
+    setLoading(true);
+    const result = await supabase.auth.signInWithOtp({ email });
+    setLoading(false);
+
+    // @ts-ignore
+    console.debug("signInWithOtp result:", result);
+
+    // @ts-ignore
+    if (result.error) {
+      showError(result.error.message || "Falha ao enviar o link mágico.");
+      return;
+    }
+
+    showSuccess("Link mágico enviado — verifique seu e-mail para acessar a conta.");
   };
 
   return (
@@ -168,6 +191,17 @@ const Login: React.FC = () => {
               className="px-4 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200"
             >
               Criar conta
+            </button>
+          </div>
+
+          <div className="mt-2 flex justify-center">
+            <button
+              onClick={handleSendMagicLink}
+              type="button"
+              disabled={loading || !email}
+              className="px-3 py-2 text-sm text-blue-600 hover:underline disabled:opacity-60"
+            >
+              Enviar link mágico (entrar sem senha)
             </button>
           </div>
         </form>
